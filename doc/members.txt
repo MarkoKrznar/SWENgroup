@@ -1,0 +1,11 @@
+Name: <Ivaylo Tassev>
+Account: <it4527>
+Have you been on co-op? yes
+List 1 to 3 programming languages you know: java javascript react
+List 1 to 3 hobbies or interests: fishing football enduro 
+
+Name: Adrián Cervantes Menéndez
+Account: adricervantesm
+Have you been on co-op? no
+List 1 to 3 programming languages you know: c++, java, html
+List 1 to 3 hobbies or interests: football, gym, netflix
