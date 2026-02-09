@@ -1,5 +1,5 @@
-Name: Ivaylo
-Account: it4527
-Have you been on co-op? yes
-List 1 to 3 programming languages you know: java javasciprt react
-List 1 to 3 hobbies or interests: football cars fishing
+Name: Marko Krznar
+Account: MarkoKrznar
+Have you been on co-op? no
+List 1 to 3 programming languages you know: java javasciprt python
+List 1 to 3 hobbies or interests: darts cars tv shows
