@@ -2,7 +2,7 @@
 
 import java.util.Random ;   // to simulate random temperature fluctuations.
 
-public class KelvinTempSensor {
+public class KelvinTempSensor implements ITempSensor {
 
     private final int MINREADING = 23315 ;
     private final int MAXREADING = 38315 ;

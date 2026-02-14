@@ -2,16 +2,21 @@ import java.util.Observable;
 
 public class WeatherStation extends Observable implements Runnable {
 
-    private final KelvinTempSensor sensor;
+    
     private final int KTOC = -27315;
     private final long PERIOD = 1000;
-    Barometer bar = new Barometer();
+    private final IBarometer bar;
+    private final ITempSensor sensor;
     private int currentReading;
     private double currentPressure;
 
-    public WeatherStation() {
-        sensor = new KelvinTempSensor();
-        currentReading = sensor.reading();
+
+    //Injecting the dependencies through the constructor
+    public WeatherStation(ITempSensor sensor, IBarometer bar) {
+        this.sensor = sensor;
+        this.bar = bar;
+        this.currentReading = sensor.reading();
+        this.currentPressure = bar.pressure();
     }
     
     public void run() {
