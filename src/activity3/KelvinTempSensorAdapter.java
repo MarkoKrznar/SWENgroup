@@ -8,7 +8,7 @@ public class KelvinTempSensorAdapter implements ITempSensor {
     }
 
     @Override
-    public int reading() {
+    public int getReading() {
         return sensor.reading();
     }
 }

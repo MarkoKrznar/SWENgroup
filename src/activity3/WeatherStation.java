@@ -15,7 +15,7 @@ public class WeatherStation extends Observable implements Runnable {
     public WeatherStation(ITempSensor sensor, IBarometer bar) {
         this.sensor = sensor;
         this.bar = bar;
-        this.currentReading = sensor.reading();
+        this.currentReading = sensor.getReading();
         this.currentPressure = bar.pressure();
     }
     
@@ -28,7 +28,7 @@ public class WeatherStation extends Observable implements Runnable {
                 Thread.sleep(PERIOD);
             } catch (Exception e) {}
 
-            reading = sensor.reading();
+            reading = sensor.getReading();
             pressure = bar.pressure();
             synchronized(this) {
                 currentReading = reading;

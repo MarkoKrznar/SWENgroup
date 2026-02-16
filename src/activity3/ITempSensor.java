@@ -1,3 +1,3 @@
 public interface ITempSensor {
-    int reading();
+    int getReading();
 }
