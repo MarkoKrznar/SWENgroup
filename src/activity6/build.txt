@@ -1,0 +1,3 @@
+To make program run, write in terminal:
+    javac *.java
+    java MainLauncher
