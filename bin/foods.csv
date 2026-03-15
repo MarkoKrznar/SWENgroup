@@ -1,0 +1,26 @@
+b,Hot Dog,147.0,13.6,1.1,5.1
+b,Hot Dog Bun,120.0,1.9,21.3,4.1
+b,Mustard,9.0,0.2,0.5,0.6
+b,Chicken Breast,165.0,3.6,0.0,31.0
+b,Oatmeal,158.0,3.4,27.0,6.6
+b,Banana,89.0,0.3,23.0,1.1
+b,Brown Rice,216.0,1.8,44.8,5.0
+b,Broccoli,55.0,0.6,11.2,3.7
+b,Cheddar Cheese,113.0,9.3,0.4,7.0
+b,White Bread,79.0,1.0,15.0,2.7
+b,Butter,102.0,11.5,0.0,0.1
+b,Egg,78.0,5.0,0.6,6.3
+b,Milk (cup),149.0,8.0,12.0,8.0
+b,Orange Juice,112.0,0.5,26.0,1.7
+b,Apple,95.0,0.3,25.1,0.5
+b,Tuna (can),109.0,2.5,0.0,20.0
+b,Pasta,220.0,1.3,43.2,8.1
+b,Tomato Sauce,80.0,0.4,18.0,4.0
+b,Lettuce,5.0,0.1,1.0,0.5
+b,Tomato,22.0,0.2,4.8,1.1
+r,Hot Dog-Bun-Mustard,Hot Dog,1.0,Hot Dog Bun,1.0,Mustard,1.5
+r,Oatmeal+Banana,Oatmeal,1.0,Banana,1.0
+r,Grilled Chicken+Rice,Chicken Breast,1.0,Brown Rice,1.0,Broccoli,1.0
+r,Scrambled Eggs,Egg,2.0,Butter,0.5,Milk (cup),0.2
+r,Tuna Sandwich,Tuna (can),1.0,White Bread,2.0,Lettuce,1.0,Tomato,1.0
+r,Pasta+Tomato,Pasta,1.0,Tomato Sauce,1.0
