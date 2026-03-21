@@ -11,7 +11,7 @@ public class BasicFood extends FoodComponent {
     // ── CONSTRUCTOR ─────────────────────────────────────────
     public BasicFood(String name, double calories,
             double fat, double carb, double protein) {
-        super(name);
+        super(name, FoodType.BASIC_FOOD);
         this.calories = calories;
         this.fat = fat;
         this.carb = carb;

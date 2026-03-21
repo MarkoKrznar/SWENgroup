@@ -9,7 +9,7 @@ package Phase1.Model;
  * The recipe class also implements the print, add, remove, and getComponent
  * methods from the Food class.
  */
-public class Recipe extends FoodComponent {
+/*public class Recipe extends FoodComponent {
 
     public Recipe(String name) {
         super(name);
@@ -46,4 +46,4 @@ public class Recipe extends FoodComponent {
         throw new UnsupportedOperationException("Unimplemented method 'toCSV'");
     }
 
-}
+}*/

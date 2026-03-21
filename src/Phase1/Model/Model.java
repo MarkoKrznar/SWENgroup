@@ -3,25 +3,16 @@ package Phase1.Model;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 public class Model {
     // Hold a list of foods or other data
-    private Map<String, FoodComponent> foods = new LinkedHashMap<>();
+    private FoodCollection foodCollection = new FoodCollection();
 
     public Model() {
     }
 
-    // Add getters/setters or methods as needed
-    public FoodComponent getFoods(String name) {
-        return foods.get(name);
-    }
-
-    public List<FoodComponent> getAllFoods() {
-        return new ArrayList<>(foods.values());
+    public FoodCollection getFoodCollection() {
+        return foodCollection;
     }
 
     public void loadFoods() {
@@ -47,14 +38,32 @@ public class Model {
                     double carb = Double.parseDouble(parts[4]);
                     double protein = Double.parseDouble(parts[5]);
 
-                    foods.put(name, new BasicFood(
-                            name,
-                            calories, fat, carb, protein));
+                    foodCollection.addFood(new BasicFood(
+                            name, calories, fat, carb, protein));
                 }
             }
         } catch (IOException e) {
             System.err.println("Could not load foods.csv: " + e.getMessage());
         }
+    }
+
+    // Adding food to the collection and displaying it in the table
+    public void addFood(FoodComponent food) {
+        foodCollection.addFood(food);
+
+        java.io.File file = new java.io.File(System.getProperty("user.dir") + "\\bin\\foods.csv");
+
+        try (java.io.FileWriter fw = new java.io.FileWriter(file, true);
+                java.io.BufferedWriter bw = new java.io.BufferedWriter(fw)) {
+
+            bw.newLine(); // ← go to next line
+            bw.write(food.toCSV()); // ← write only the new food
+
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+
     }
 
 }

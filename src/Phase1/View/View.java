@@ -1,8 +1,8 @@
 package Phase1.View;
 
-import java.util.List;
-
+import java.util.Map;
 import Phase1.Controller.Controller;
+import Phase1.Model.BasicFood;
 import Phase1.Model.FoodComponent;
 import Phase1.Model.Model;
 import javafx.application.Application;
@@ -94,8 +94,94 @@ public class View extends Application {
         return foodSection;
     }
 
-    public void refreshTable(List<FoodComponent> foods) {
-        tableData.setAll(foods);
+    // Adding Dialog window when the user is adding a new food!
+    public void showAddFoodDialog() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add Basic Food");
+        dialog.setHeaderText("Enter the details of the new food");
+
+        // ── Build form grid ──────────────────────────────────
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
+
+        TextField tfName = new TextField();
+        TextField tfCalories = new TextField();
+        TextField tfFat = new TextField();
+        TextField tfCarb = new TextField();
+        TextField tfProtein = new TextField();
+
+        tfName.setPromptText("Name");
+        tfCalories.setPromptText("Calories");
+        tfFat.setPromptText("Fats");
+        tfCarb.setPromptText("Carbs");
+        tfProtein.setPromptText("Proteins");
+
+        grid.add(new Label("Name:"), 0, 0);
+        grid.add(tfName, 1, 0);
+        grid.add(new Label("Calories:"), 0, 1);
+        grid.add(tfCalories, 1, 1);
+        grid.add(new Label("Fats:"), 0, 2);
+        grid.add(tfFat, 1, 2);
+        grid.add(new Label("Carbs:"), 0, 3);
+        grid.add(tfCarb, 1, 3);
+        grid.add(new Label("Proteins:"), 0, 4);
+        grid.add(tfProtein, 1, 4);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        javafx.application.Platform.runLater(() -> tfName.requestFocus());
+
+        dialog.showAndWait().ifPresent(result -> {
+            if (result == ButtonType.OK) {
+
+                // Step 1 — validate empty fields
+                if (tfName.getText().trim().isEmpty() ||
+                        tfCalories.getText().trim().isEmpty() ||
+                        tfFat.getText().trim().isEmpty() ||
+                        tfCarb.getText().trim().isEmpty() ||
+                        tfProtein.getText().trim().isEmpty()) {
+                    showMessage("Please fill in all fields!");
+                    return;
+                }
+            }
+
+            try {
+                // send to controller to handle adding food (validation + model update + table
+                // refresh)
+                BasicFood newFood = new BasicFood(
+                        tfName.getText().trim(),
+                        Double.parseDouble(tfCalories.getText().trim()),
+                        Double.parseDouble(tfFat.getText().trim()),
+                        Double.parseDouble(tfCarb.getText().trim()),
+                        Double.parseDouble(tfProtein.getText().trim()));
+
+                controller.handleAddFoodDialog(newFood);
+
+            } catch (NumberFormatException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Input Error");
+                alert.setHeaderText("Invalid number format");
+                alert.setContentText("Please enter valid numbers for calories, fats, carbs, and proteins.");
+                alert.showAndWait();
+            }
+        });
+
+    }
+
+    // Alert to fill in the field!
+    public void showMessage(String msg) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Wellness Manager");
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+        alert.showAndWait();
+    }
+
+    public void refreshTable(Map<String, FoodComponent> foods) {
+        tableData.setAll(foods.values());
     }
 
     public static void main(String[] args) {

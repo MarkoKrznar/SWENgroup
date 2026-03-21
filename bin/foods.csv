@@ -24,3 +24,6 @@ r,Grilled Chicken+Rice,Chicken Breast,1.0,Brown Rice,1.0,Broccoli,1.0
 r,Scrambled Eggs,Egg,2.0,Butter,0.5,Milk (cup),0.2
 r,Tuna Sandwich,Tuna (can),1.0,White Bread,2.0,Lettuce,1.0,Tomato,1.0
 r,Pasta+Tomato,Pasta,1.0,Tomato Sauce,1.0
+b,Test,35.0,35.0,64.0,75.0
+b,Burger,450.0,32.0,34.0,12.0
+b,Spaggeti,123.0,24.0,15.0,24.0

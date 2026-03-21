@@ -7,8 +7,9 @@ public abstract class FoodComponent {
     private FoodType type;
 
     // ── CONSTRUCTOR ─────────────────────────────────────────
-    public FoodComponent(String name) {
+    public FoodComponent(String name, FoodType type) {
         this.name = name;
+        this.type = type;
     }
 
     // ── GETTERS ─────────────────────────────────────────────
