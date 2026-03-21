@@ -1,6 +1,7 @@
 package Phase1.View;
 
-import java.util.Map;
+import java.util.List;
+
 import Phase1.Controller.Controller;
 import Phase1.Model.BasicFood;
 import Phase1.Model.FoodComponent;
@@ -180,8 +181,8 @@ public class View extends Application {
         alert.showAndWait();
     }
 
-    public void refreshTable(Map<String, FoodComponent> foods) {
-        tableData.setAll(foods.values());
+    public void refreshTable(List<FoodComponent> foods) {
+        tableData.setAll(foods);
     }
 
     public static void main(String[] args) {

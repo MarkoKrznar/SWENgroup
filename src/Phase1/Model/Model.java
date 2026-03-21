@@ -24,10 +24,6 @@ public class Model {
             String line;
             while ((line = br.readLine()) != null) {
 
-                // skip blank lines and recipe lines
-                if (line.isEmpty() || line.startsWith("r"))
-                    continue;
-
                 // only process lines starting with "b"
                 if (line.startsWith("b")) {
                     String[] parts = line.split(",");
@@ -40,10 +36,36 @@ public class Model {
 
                     foodCollection.addFood(new BasicFood(
                             name, calories, fat, carb, protein));
+
+                    // Starting point for recipe loading (not implemented yet)
+                } else if (line.startsWith("r")) {
+
+                    String[] parts = line.split(",");
+
+                    String recipeName = parts[1];
+                    Recipe recipe = new Recipe(recipeName);
+
+                    // loop through ingredient pairs
+                    for (int i = 2; i < parts.length; i += 2) {
+                        String ingredientName = parts[i];
+                        double servings = Double.parseDouble(parts[i + 1]);
+
+                        // get ingredient from FoodCollection
+                        // must already exist as a BasicFood (or previously loaded Recipe)
+                        FoodComponent ingredient = foodCollection.getFood(ingredientName);
+
+                        if (ingredient != null) {
+                            recipe.addIngredient(ingredient, servings);
+                        } else {
+                            System.err.println("Ingredient not found: " + ingredientName);
+                        }
+                    }
+
+                    foodCollection.addFood(recipe);
                 }
             }
         } catch (IOException e) {
-            System.err.println("Could not load foods.csv: " + e.getMessage());
+            System.err.println(" Could not load foods.csv: " + e.getMessage());
         }
     }
 
@@ -63,7 +85,6 @@ public class Model {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
 }

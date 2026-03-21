@@ -17,12 +17,11 @@ public class Recipe extends FoodComponent {
     private List<IngredientEntry> ingredients;
 
     public Recipe(String name) {
-        super(name);
+        super(name, FoodType.RECIPE);
         this.ingredients = new ArrayList<>(); // storing the ingredients in an array
     }
 
     // INGREDIENT MANAGEMENT
-
     public void addIngredient(FoodComponent food, double servings) {
         for (IngredientEntry entry : ingredients) {
             if (entry.getFood().getName().equals(food.getName())) { // checks if the ingredient already exists
