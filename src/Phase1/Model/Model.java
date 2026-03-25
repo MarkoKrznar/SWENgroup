@@ -87,4 +87,20 @@ public class Model {
         }
     }
 
+    // Pending ..... Dialog as well
+    public void addRecipe(Recipe recipe) {
+        foodCollection.addFood(recipe);
+        java.io.File file = new java.io.File(System.getProperty("user.dir") + "\\bin\\foods.csv");
+        try (java.io.FileWriter fw = new java.io.FileWriter(file, true);
+                java.io.BufferedWriter bw = new java.io.BufferedWriter(fw)) {
+
+            bw.newLine(); // ← go to next line
+            bw.write(recipe.toCSV()); // ← write only the new recipe
+
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 }

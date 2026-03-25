@@ -27,3 +27,13 @@ r,Pasta+Tomato,Pasta,1.0,Tomato Sauce,1.0
 b,Test,35.0,35.0,64.0,75.0
 b,Burger,450.0,32.0,34.0,12.0
 b,Spaggeti,123.0,24.0,15.0,24.0
+
+r,Grilled Chiken,Chicken Breast,1.0
+b,Chinken BBQ,242.0,123.0,234.0,56.0
+r,Chicken+BBQ grilled,Chinken BBQ,1.0
+r,Quakamole,Egg,1.0
+r,tetet,Mustard,1.0
+r,tetest,Hot Dog,1.0
+r,protein banana,Banana,1.0
+r,Tomato juice,Tomato,1.0
+r,Banana Splash,Banana,1.0

@@ -1,11 +1,14 @@
 package Phase1.View;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Phase1.Controller.Controller;
 import Phase1.Model.BasicFood;
 import Phase1.Model.FoodComponent;
+import Phase1.Model.FoodType;
 import Phase1.Model.Model;
+import Phase1.Model.Recipe;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,6 +19,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 public class View extends Application {
 
@@ -26,7 +30,10 @@ public class View extends Application {
     private Button addFoodButton = new Button("Add Food");
     private Button btnAddRecipe = new Button("Add Recipe");
 
+    private Recipe recipe;
+
     private TableView<FoodComponent> foodsTable = new TableView<>();
+    private List<FoodComponent> allFoods = new ArrayList<>();
     ObservableList<FoodComponent> tableData = FXCollections.observableArrayList();
 
     private Controller controller;
@@ -172,6 +179,101 @@ public class View extends Application {
 
     }
 
+    // Adding a dialog for adding a new recipe
+    public Pair<Boolean, Recipe> showRecipeAddDialog() {
+        recipe = null;
+        Dialog<Pair<Boolean, Recipe>> dialog = new Dialog<>();
+        dialog.setTitle("Add Recipe");
+        dialog.setHeaderText("Enter Recipe Details");
+
+        ButtonType addButton = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButton, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField recipeName = new TextField();
+        recipeName.setPromptText("Recipe Name");
+
+        ChoiceBox<String> chooseFoods = new ChoiceBox<>();
+        for (FoodComponent food : allFoods) {
+            if (food.getType() == FoodType.BASIC_FOOD) {
+                chooseFoods.getItems().add(food.getName());
+            }
+        }
+
+        // Pair of TextField and ChoiceBox for servings and food selection
+        TextField servings = new TextField();
+        servings.setPromptText("Servings");
+
+        TextField ingredients = new TextField();
+        ingredients.setEditable(false);
+
+        Button btnAdd = new Button("Add");
+
+        btnAdd.setOnAction(event -> {
+            if (!recipeName.getText().isEmpty() && chooseFoods.getValue() != null && !servings.getText().isEmpty()) {
+                String foodName = chooseFoods.getValue();
+
+                FoodComponent selectedFood = null;
+                for (FoodComponent food : allFoods) {
+                    if (food.getName().equals(foodName)) {
+                        selectedFood = food;
+                        break;
+                    }
+                }
+
+                if (selectedFood != null) {
+                    try {
+                        double qty = Double.parseDouble(servings.getText());
+                        if (recipe == null) {
+                            recipe = new Recipe(recipeName.getText());
+                        }
+                        if (!ingredients.getText().isEmpty()) {
+                            ingredients.appendText(", ");
+                        }
+                        ingredients.appendText(selectedFood.getName() + " x" + qty);
+                        recipe.addIngredient(selectedFood, qty);
+                        servings.clear();
+                    } catch (NumberFormatException e) {
+                        showMessage("Servings must be a valid number!");
+                    }
+                } else {
+                    showMessage("Selected food not found in the list!");
+                }
+            } else {
+                showMessage("Please fill in all inputs!");
+            }
+        });
+
+        grid.add(new Label("Recipe Name:"), 0, 0);
+        grid.add(recipeName, 1, 0);
+        grid.add(new Label("Choose Foods:"), 0, 1);
+        grid.add(chooseFoods, 1, 1);
+        grid.add(new Label("Ingredients:"), 0, 2);
+        grid.add(ingredients, 1, 2);
+
+        grid.add(new Label("Servings:"), 0, 3);
+        grid.add(servings, 1, 3);
+        grid.add(btnAdd, 1, 4);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == addButton) {
+                return new Pair<>(true, recipe);
+            }
+            return new Pair<>(false, null);
+        });
+
+        Pair<Boolean, Recipe> result = dialog.showAndWait().orElse(new Pair<>(false, null));
+        if (result.getKey() && result.getValue() != null) {
+            controller.handleAddRecipeDialog(result.getValue());
+        }
+        return result;
+    }
+
     // Alert to fill in the field!
     public void showMessage(String msg) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -183,6 +285,11 @@ public class View extends Application {
 
     public void refreshTable(List<FoodComponent> foods) {
         tableData.setAll(foods);
+        for (FoodComponent food : foods) {
+            if (allFoods.stream().noneMatch(f -> f.getName().equals(food.getName()))) {
+                allFoods.add(food);
+            }
+        }
     }
 
     public static void main(String[] args) {
