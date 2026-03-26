@@ -3,6 +3,7 @@ package Phase1.Model;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 
 public class Model {
     // Hold a list of foods or other data
@@ -101,6 +102,46 @@ public class Model {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * calculates macro percentage split by calories
+     * fat is 9 kcal/g, carb is 4 kcal/g, protein is 4 kcal/g.
+     */
+    public MacroBreakdown calculateMacroBreakdown(double fatGrams, double carbGrams, double proteinGrams) {
+
+        double fatCalories = fatGrams * 9.0;
+        double carbCalories = carbGrams * 4.0;
+        double proteinCalories = proteinGrams * 4.0;
+
+        double totalMacroCalories = fatCalories + carbCalories + proteinCalories;
+        if (totalMacroCalories == 0) {
+            return new MacroBreakdown(0, 0, 0);
+        }
+
+        // calculating percenteges
+        double fatPercent = (fatCalories / totalMacroCalories) * 100.0;
+        double carbPercent = (carbCalories / totalMacroCalories) * 100.0;
+        double proteinPercent = (proteinCalories / totalMacroCalories) * 100.0;
+
+        return new MacroBreakdown(fatPercent, carbPercent, proteinPercent);
+    }
+
+    /**
+     * to calculate percentages if given a list of foods
+     */
+    public MacroBreakdown calculateMacroBreakdown(List<IngredientEntry> entries) {
+        double totalFatGrams = 0;
+        double totalCarbGrams = 0;
+        double totalProteinGrams = 0;
+
+        for (IngredientEntry entry : entries) {
+            totalFatGrams += entry.getFood().getFat() * entry.getServings();
+            totalCarbGrams += entry.getFood().getCarb() * entry.getServings();
+            totalProteinGrams += entry.getFood().getProtein() * entry.getServings();
+        }
+
+        return calculateMacroBreakdown(totalFatGrams, totalCarbGrams, totalProteinGrams); 
     }
 
 }
