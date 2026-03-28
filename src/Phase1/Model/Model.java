@@ -4,19 +4,41 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Model {
-    // Hold a list of foods or other data
-    private FoodCollection foodCollection = new FoodCollection();
-    private List<WeightEntry> weightEntries = new ArrayList<>();
+    private final FoodCollection foodCollection = new FoodCollection();
+    private final Map<LocalDate, DailyLog> logs = new LinkedHashMap<>();
+    private LocalDate selectedDate = LocalDate.now();
 
     public Model() {
     }
 
     public FoodCollection getFoodCollection() {
         return foodCollection;
+    }
+
+    public DailyLog getOrCreateLog(LocalDate date) {
+        if (date == null) {
+            throw new IllegalArgumentException("Date cannot be null");
+        }
+        return logs.computeIfAbsent(date, DailyLog::new);
+    }
+
+    public DailyLog getSelectedLog() {
+        return getOrCreateLog(selectedDate);
+    }
+
+    public void setSelectedDate(LocalDate date) {
+        if (date == null) {
+            throw new IllegalArgumentException("Date cannot be null");
+        }
+        selectedDate = date;
+    }
+
+    public LocalDate getSelectedDate() {
+        return selectedDate;
     }
 
     public void loadFoods() {
@@ -76,171 +98,31 @@ public class Model {
     // Adding food to the collection and displaying it in the table
     public void addFood(FoodComponent food) {
         foodCollection.addFood(food);
-
-        java.io.File file = new java.io.File(System.getProperty("user.dir") + "\\bin\\foods.csv");
-
-        try (java.io.FileWriter fw = new java.io.FileWriter(file, true);
-                java.io.BufferedWriter bw = new java.io.BufferedWriter(fw)) {
-
-            bw.newLine(); // ← go to next line
-            bw.write(food.toCSV()); // ← write only the new food
-
-        } catch (IOException e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 
     // Pending ..... Dialog as well
     public void addRecipe(Recipe recipe) {
         foodCollection.addFood(recipe);
-        java.io.File file = new java.io.File(System.getProperty("user.dir") + "\\bin\\foods.csv");
-        try (java.io.FileWriter fw = new java.io.FileWriter(file, true);
-                java.io.BufferedWriter bw = new java.io.BufferedWriter(fw)) {
-
-            bw.newLine(); // ← go to next line
-            bw.write(recipe.toCSV()); // ← write only the new recipe
-
-        } catch (IOException e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 
-    /**
-     * Calculates macro percentage split by grams
-     * Percentages are whole numbers and always sum to 100
-     */
-    public MacroBreakdown calculateMacroBreakdown(double fatGrams, double carbGrams, double proteinGrams) {
-
-        double safeFat = Math.max(0.0, fatGrams);
-        double safeCarb = Math.max(0.0, carbGrams);
-        double safeProtein = Math.max(0.0, proteinGrams);
-
-        double totalMacroGrams = safeFat + safeCarb + safeProtein;
-        if (totalMacroGrams == 0) {
-            return new MacroBreakdown(0, 0, 0);
+    public void addLogEntry(String foodName, double servings) {
+        FoodComponent food = foodCollection.getFood(foodName);
+        if (food == null) {
+            throw new IllegalArgumentException("Food not found: " + foodName);
         }
-
-        double[] raw = new double[] {
-                (safeFat / totalMacroGrams) * 100.0,
-                (safeCarb / totalMacroGrams) * 100.0,
-                (safeProtein / totalMacroGrams) * 100.0
-        };
-
-        int[] rounded = new int[raw.length];
-        for (int i = 0; i < raw.length; i++) {
-            rounded[i] = (int) raw[i];
-        }
-
-        int sum = 0;
-        for (int value : rounded) {
-            sum += value;
-        }
-        int remainder = 100 - sum;
-
-        // distributing any remaining percentage points to the largest fractional parts.
-        while (remainder > 0) {
-            int bestIndex = 0; // best candidate to give remainder to get 100
-            double bestFraction = (raw[0] - Math.floor(raw[0])); 
-
-            for (int i = 1; i < raw.length; i++) { // checking remaining macros to find bigger fractions 
-                double fraction = raw[i] - Math.floor(raw[i]); // get fraction
-                if (fraction > bestFraction) { // compare best and current 
-                    bestFraction = fraction;
-                    bestIndex = i;
-                }
-            }
-
-            rounded[bestIndex]++; // giving 1 percent to the biggest fraction
-            raw[bestIndex] = Math.floor(raw[bestIndex]); // set fraction to 0 so it doesnt keep winning in every iteration
-            remainder--;
-        }
-
-        return new MacroBreakdown(rounded[0], rounded[1], rounded[2]);
+        getSelectedLog().addEntry(food, servings);
     }
 
-    /**
-     * to calculate percentages if given a list of foods
-     */
-    public MacroBreakdown calculateMacroBreakdown(List<IngredientEntry> entries) {
-        double totalFatGrams = 0;
-        double totalCarbGrams = 0;
-        double totalProteinGrams = 0;
-
-        for (IngredientEntry entry : entries) {
-            totalFatGrams += entry.getFood().getFat() * entry.getServings();
-            totalCarbGrams += entry.getFood().getCarb() * entry.getServings();
-            totalProteinGrams += entry.getFood().getProtein() * entry.getServings();
-        }
-
-        return calculateMacroBreakdown(totalFatGrams, totalCarbGrams, totalProteinGrams); 
+    public boolean deleteLogEntry(int index) {
+        return getSelectedLog().removeEntry(index);
     }
 
-    public void setWeightForDate(LocalDate date, double weight) {
-
-        // checking for potential errors
-
-        if (date == null) {
-            throw new IllegalArgumentException("Date cannot be null");
-        }
-        if (weight <= 0) {
-            throw new IllegalArgumentException("Weight must be greater than 0");
-        }
-
-
-        for (WeightEntry entry : weightEntries) {
-            if (entry.getDate().equals(date)) {
-                entry.setWeight(weight);
-                return;
-            }
-        }
-
-        weightEntries.add(new WeightEntry(date, weight));
-    }
-    
-
-    public Double getWeightForDate(LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("Date cannot be null");
-        }
-
-        // 1) Exact date match
-        for (WeightEntry entry : weightEntries) {
-            if (entry.getDate().equals(date)) {
-                return entry.getWeight();
-            }
-        }
-
-        // 2) Most recent previous date
-        LocalDate latestPreviousDate = null;
-        double latestPreviousWeight = 150.0;
-
-        for (WeightEntry entry : weightEntries) {
-            LocalDate entryDate = entry.getDate();
-            if (entryDate.isBefore(date) &&
-                    (latestPreviousDate == null || entryDate.isAfter(latestPreviousDate))) {
-                latestPreviousDate = entryDate;
-                latestPreviousWeight = entry.getWeight();
-            }
-        }
-
-        // 3) Default when no prior entries exist
-        return latestPreviousDate == null ? 150.0 : latestPreviousWeight;
+    public void updateWeight(double weight) {
+        getSelectedLog().setWeight(weight);
     }
 
-    public boolean removeWeightForDate(LocalDate date) {
-        for (int i = 0; i < weightEntries.size(); i++) {
-            if (weightEntries.get(i).getDate().equals(date)) {
-                weightEntries.remove(i);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public List<WeightEntry> getWeightEntries() {
-        return new ArrayList<>(weightEntries);
+    public void updateCalorieLimit(double limit) {
+        getSelectedLog().setCalorieLimit(limit);
     }
 
 }
