@@ -19,8 +19,11 @@ public class Model {
     private final FoodCollection foodCollection = new FoodCollection();
     private final Map<LocalDate, DailyLog> logs = new LinkedHashMap<>();
     private LocalDate selectedDate = LocalDate.now();
+    private final FoodFactoryRegistry factoryRegistry = new FoodFactoryRegistry();
 
     public Model() {
+        factoryRegistry.register(new BasicFoodFactory());
+        factoryRegistry.register(new RecipeFactory());
     }
 
     public FoodCollection getFoodCollection() {
@@ -77,6 +80,10 @@ public class Model {
         loadFoodsFromCsv();
     }
 
+
+    // after implementing factory this method is using registry to create foods and recipes
+    // instead of creating methods here it just grabs the right factory and lets the factory handle obj creation
+
     private void loadFoodsFromCsv() {
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(
@@ -90,37 +97,17 @@ public class Model {
                 }
 
                 String[] parts = line.split(",");
-
-                if (line.startsWith("b")) {
-                    String name = parts[1];
-                    double calories = Double.parseDouble(parts[2]);
-                    double fat = Double.parseDouble(parts[3]);
-                    double carb = Double.parseDouble(parts[4]);
-                    double protein = Double.parseDouble(parts[5]);
-
+                String typeCode = parts[0];
+                FoodFactory factory = factoryRegistry.getFactory(typeCode); // get factory
+                if (factory != null) {
+                    FoodComponent food = factory.create(parts, foodCollection);
+                    String name = food.getName();
+                    //only add food that is not already in collection
                     if (!foodCollection.containsFood(name)) {
-                        foodCollection.addFood(new BasicFood(name, calories, fat, carb, protein));
+                        foodCollection.addFood(food);
                     }
-
-                } else if (line.startsWith("r")) {
-                    String recipeName = parts[1];
-                    Recipe recipe = new Recipe(recipeName);
-
-                    for (int i = 2; i < parts.length; i += 2) {
-                        String ingredientName = parts[i];
-                        double servings = Double.parseDouble(parts[i + 1]);
-
-                        FoodComponent ingredient = foodCollection.getFood(ingredientName);
-                        if (ingredient != null) {
-                            recipe.addIngredient(ingredient, servings);
-                        } else {
-                            System.err.println("Ingredient not found: " + ingredientName);
-                        }
-                    }
-
-                    if (!foodCollection.containsFood(recipeName)) {
-                        foodCollection.addFood(recipe);
-                    }
+                } else {
+                    System.err.println("Unknown food type code: " + typeCode);
                 }
             }
         } catch (IOException e) {
