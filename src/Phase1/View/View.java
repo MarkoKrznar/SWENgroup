@@ -6,6 +6,7 @@ import java.util.List;
 
 import Phase1.Controller.Controller;
 import Phase1.Model.BasicFood;
+import Phase1.Model.Exercise;
 import Phase1.Model.FoodComponent;
 import Phase1.Model.FoodType;
 import Phase1.Model.LogEntry;
@@ -29,6 +30,8 @@ public class View extends Application {
 
     private Button loadFoodsButton = new Button("Load Foods");
     private Button loadLogButton = new Button("Load Log");
+    private Button loadExerciseBtn = new Button("Load Exercise");
+    private Button addExerciseBtn = new Button("Add Exercise");
     private Button saveLogButton = new Button("Save Log");
     private Button showBasicFoodsButton = new Button("Show Basic Foods");
     private Button showRecipesButton = new Button("Show Recipes");
@@ -59,6 +62,8 @@ public class View extends Application {
     private ObservableList<FoodComponent> tableData = FXCollections.observableArrayList();
     private ObservableList<LogEntry> logTableData = FXCollections.observableArrayList();
 
+    private TableView<Exercise> exerciseTable = new TableView<>();
+
     private Controller controller;
 
     @Override
@@ -67,11 +72,22 @@ public class View extends Application {
 
         VBox leftSection = createFoodSection();
         VBox rightSection = createDailyLogSection();
+        VBox exerciseSection = createExerciseSection();
 
-        HBox main = new HBox(20, leftSection, rightSection);
-        main.setPadding(new Insets(15));
+        HBox topRow = new HBox(20, leftSection, rightSection);
+        topRow.setPadding(new Insets(15, 15, 0, 15));
 
-        Scene scene = new Scene(main, 1450, 800);
+        exerciseSection.setPrefWidth(650);
+        exerciseTable.setPrefHeight(330);
+        exerciseTable.setPrefWidth(650);
+
+        HBox bottomRow = new HBox(20, exerciseSection);
+        bottomRow.setPadding(new Insets(15, 15, 10, 15));
+        bottomRow.setAlignment(Pos.CENTER);
+
+        VBox main = new VBox(10, topRow, bottomRow);
+
+        Scene scene = new Scene(main, 1450, 950);
         stage.setScene(scene);
         stage.show();
 
@@ -129,6 +145,7 @@ public class View extends Application {
         return foodSection;
     }
 
+    // Daily Dialog
     @SuppressWarnings("unchecked")
     private VBox createDailyLogSection() {
         VBox logSection = new VBox(12);
@@ -190,6 +207,7 @@ public class View extends Application {
         return logSection;
     }
 
+    // FoodDialog
     public void showAddFoodDialog() {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Add Basic Food");
@@ -260,6 +278,7 @@ public class View extends Application {
         });
     }
 
+    // Recipe Dialog
     public Pair<Boolean, Recipe> showRecipeAddDialog() {
         recipe = null;
         Dialog<Pair<Boolean, Recipe>> dialog = new Dialog<>();
@@ -367,6 +386,45 @@ public class View extends Application {
         }
 
         return result;
+    }
+
+    // Exercise section
+    @SuppressWarnings("unchecked")
+    private VBox createExerciseSection() {
+        VBox exerciseSection = new VBox(10);
+        exerciseSection.setAlignment(Pos.CENTER);
+
+        exerciseTable = new TableView<>();
+        TableColumn<Exercise, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn<Exercise, Double> caloriesColumn = new TableColumn<>("Calories");
+        caloriesColumn.setCellValueFactory(new PropertyValueFactory<>("calories"));
+
+        TableColumn<Exercise, Double> actionColumn = new TableColumn<>("Action");
+        actionColumn.setCellValueFactory(new PropertyValueFactory<>("action"));
+
+        // TODO: Log button
+
+        // Adding all the columns to the table's list of columns
+        exerciseTable.getColumns().addAll(nameColumn, caloriesColumn, actionColumn);
+        exerciseTable.setEditable(false);
+        exerciseTable.setPrefHeight(300);
+        exerciseTable.setPrefWidth(60);
+
+        FlowPane exerciseControlPanel = new FlowPane(10, 10);
+        exerciseControlPanel.setAlignment(Pos.CENTER);
+        exerciseControlPanel.setStyle("-fx-background-color: #e3e3e3;");
+        exerciseControlPanel.getChildren().add(loadExerciseBtn);
+
+        VBox addExerciseSection = new VBox(10);
+        addExerciseSection.setAlignment(Pos.CENTER);
+        addExerciseSection.setStyle("-fx-background-color: #e3e3e3;");
+        addExerciseSection.getChildren().add(addExerciseBtn);
+
+        exerciseSection.getChildren().addAll(exerciseControlPanel, exerciseTable, addExerciseSection);
+        return exerciseSection;
+
     }
 
     public void showMessage(String msg) {
