@@ -1,0 +1,9 @@
+{
+    "java.project.sourcePaths": [
+        "src"
+    ],
+    "java.project.outputPath": "bin",
+    "java.project.referencedLibraries": [
+        "C:/Program Files/zulu25.32.21-ca-fx-jdk25.0.2-win_x64/lib/*.jar"
+    ]
+}
