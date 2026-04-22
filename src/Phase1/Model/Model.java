@@ -2,6 +2,8 @@ package Phase1.Model;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -17,6 +19,7 @@ import java.util.Map;
 
 public class Model {
     private final FoodCollection foodCollection = new FoodCollection();
+    private final ExerciseCollection exerciseCollection = new ExerciseCollection();
     private final Map<LocalDate, DailyLog> logs = new LinkedHashMap<>();
     private LocalDate selectedDate = LocalDate.now();
     private final FoodFactoryRegistry factoryRegistry = new FoodFactoryRegistry();
@@ -28,6 +31,10 @@ public class Model {
 
     public FoodCollection getFoodCollection() {
         return foodCollection;
+    }
+
+    public ExerciseCollection getExerciseCollection() {
+        return exerciseCollection;
     }
 
     public DailyLog getOrCreateLog(LocalDate date) {
@@ -80,10 +87,10 @@ public class Model {
         loadFoodsFromCsv();
     }
 
-
-    // after implementing factory this method is using registry to create foods and recipes
-    // instead of creating methods here it just grabs the right factory and lets the factory handle obj creation
-
+    // after implementing factory this method is using registry to create foods and
+    // recipes
+    // instead of creating methods here it just grabs the right factory and lets the
+    // factory handle obj creation
     private void loadFoodsFromCsv() {
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(
@@ -102,7 +109,7 @@ public class Model {
                 if (factory != null) {
                     FoodComponent food = factory.create(parts, foodCollection);
                     String name = food.getName();
-                    //only add food that is not already in collection
+                    // only add food that is not already in collection
                     if (!foodCollection.containsFood(name)) {
                         foodCollection.addFood(food);
                     }
@@ -113,6 +120,50 @@ public class Model {
         } catch (IOException e) {
             System.err.println("Could not load foods.csv: " + e.getMessage());
         }
+    }
+
+    // Load exercises from exercise.csv and add them to the exercise collection
+    public void loadExerciseFromCsv() {
+        java.io.InputStream stream = getClass().getResourceAsStream("/exercise.csv");
+        if (stream == null) {
+            System.err.println("Could not find exercise.csv in resources.");
+            return;
+        }
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(stream, java.nio.charset.StandardCharsets.UTF_8))) {
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+
+                String[] parts = line.split(",");
+                String name = parts[1];
+                double calories = Double.parseDouble(parts[2]);
+                double caloriesPerHour = Double.parseDouble(parts[3]);
+                Exercise exercise = new Exercise(name, calories, caloriesPerHour);
+                if (!exerciseCollection.containsExercise(name)) {
+                    exerciseCollection.addExercise(exercise);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Could not load exercise.csv: " + e.getMessage());
+        }
+    }
+
+    public void saveExercisesToFile() throws IOException {
+        Path path = resolveDataFilePath("exercise.csv");
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(path.toFile()))) {
+            for (Exercise exercise : exerciseCollection.getAllExercises()) {
+                bw.write(exercise.toCSV() + "\n");
+            }
+        }
+    }
+
+    // Method to get all exercises
+    public List<Exercise> getExercises() {
+        return exerciseCollection.getAllExercises();
     }
 
     public void addFood(FoodComponent food) {
@@ -129,6 +180,14 @@ public class Model {
             throw new IllegalArgumentException("Food not found: " + foodName);
         }
         getSelectedLog().addEntry(food, servings);
+    }
+
+    public void addExerciseEntry(String exerciseName, double minutes) {
+        Exercise exercise = exerciseCollection.getExercise(exerciseName);
+        if (exercise == null) {
+            throw new IllegalArgumentException("Exercise not found: " + exerciseName);
+        }
+        getSelectedLog().addExercise(exercise, minutes);
     }
 
     public boolean deleteLogEntry(int index) {
@@ -285,5 +344,9 @@ public class Model {
         }
 
         return Paths.get(System.getProperty("user.dir"), "bin", fileName).toAbsolutePath();
+    }
+
+    public void addExercise(Exercise exercise) {
+        exerciseCollection.addExercise(exercise);
     }
 }

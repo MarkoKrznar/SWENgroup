@@ -1,15 +1,18 @@
 package Phase1.Controller;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import Phase1.Model.BasicFood;
+import Phase1.Model.Exercise;
 import Phase1.Model.FoodComponent;
 import Phase1.Model.FoodType;
 import Phase1.Model.Model;
 import Phase1.Model.Recipe;
 import Phase1.View.View;
+import javafx.util.Pair;
 
 public class Controller {
 
@@ -36,6 +39,9 @@ public class Controller {
         view.getDeleteLogEntryButton().setOnAction(event -> handleDeleteLogEntry());
         view.getUpdateDailyDataButton().setOnAction(event -> handleUpdateDailyData());
         view.getSaveLogButton().setOnAction(event -> handleSaveLog());
+        view.getLoadExercisesButton().setOnAction(event -> handleLoadExercises());
+        view.getAddExerciseButton().setOnAction(event -> handleAddExercise());
+        view.getAddExerciseEntryButton().setOnAction(event -> handleAddExerciseEntry());
     }
 
     private void initializeApp() {
@@ -48,6 +54,52 @@ public class Controller {
         view.refreshTable(model.getFoodCollection().getAllFoods());
         view.refreshFoodSelector(model.getFoodCollection().getAllFoods());
         refreshSelectedDateLog();
+    }
+
+    private void handleLoadExercises() {
+        model.loadExerciseFromCsv();
+        view.refreshExerciseTable(model.getExerciseCollection().getAllExercises());
+        view.refreshExerciseSelector(model.getExerciseCollection().getAllExercises());
+    }
+
+    // Add exercise dialog handler
+    private void handleAddExercise() {
+        Pair<Boolean, Exercise> result = view.showAddExerciseDialog();
+        if (result.getKey()) {
+            handleAddExerciseDialogResult(result.getValue());
+        }
+    }
+
+    // Handler for adding exercise to log
+    private void handleAddExerciseEntry() {
+        try {
+            String exerciseName = view.getSelectedExerciseNameForLog();
+            double minutes = view.getExerciseMinutesForLog();
+
+            if (exerciseName == null || exerciseName.isEmpty()) {
+                view.showMessage("Choose an exercise first.");
+                return;
+            }
+
+            model.addExerciseEntry(exerciseName, minutes);
+            refreshSelectedDateLog();
+
+        } catch (NumberFormatException e) {
+            view.showMessage("Minutes must be a valid number.");
+        }
+    }
+
+    // Process the result from the add exercise dialog
+    public void handleAddExerciseDialogResult(Exercise exercise) {
+        if (exercise != null) {
+            model.addExercise(exercise);
+            view.refreshExerciseTable(model.getExerciseCollection().getAllExercises());
+            try {
+                model.saveExercisesToFile();
+            } catch (IOException e) {
+                view.showMessage("Error saving exercises to CSV: " + e.getMessage());
+            }
+        }
     }
 
     private void handleLoadLog() {
@@ -189,6 +241,9 @@ public class Controller {
                 model.selectedDayIsOverLimit(),
                 model.getSelectedLogFatPercent(),
                 model.getSelectedLogCarbPercent(),
-                model.getSelectedLogProteinPercent());
+                model.getSelectedLogProteinPercent(),
+                model.getSelectedLog().getTotalCaloriesExpended(),
+                model.getSelectedLog().getNetCalories());
     }
+
 }

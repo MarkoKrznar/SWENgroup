@@ -9,6 +9,7 @@ public class DailyLog {
     private double weight;
     private double calorieLimit;
     private final List<LogEntry> entries;
+    private final List<ExerciseEntry> exerciseEntries = new ArrayList<>();
 
     public DailyLog(LocalDate date) {
         this(date, 150.0, 2000.0);
@@ -59,6 +60,41 @@ public class DailyLog {
             throw new IllegalArgumentException("Servings must be greater than 0");
         }
         entries.add(new LogEntry(food, servings));
+    }
+
+    public void addExercise(Exercise exercise, double minutes) {
+        if (exercise == null) {
+            throw new IllegalArgumentException("Exercise cannot be null");
+        }
+        if (minutes <= 0) {
+            throw new IllegalArgumentException("Minutes must be greater than 0");
+        }
+        exerciseEntries.add(new ExerciseEntry(exercise, minutes));
+    }
+
+    public List<ExerciseEntry> getExerciseEntries() {
+        return new ArrayList<>(exerciseEntries);
+    }
+
+    public boolean removeExerciseEntry(int index) {
+        if (index < 0 || index >= exerciseEntries.size()) {
+            return false;
+        }
+        exerciseEntries.remove(index);
+        return true;
+    }
+
+    public double getTotalCaloriesExpended() {
+        double total = 0.0;
+        for (ExerciseEntry entry : exerciseEntries) {
+            total += entry.getCaloriesExpended(weight);
+        }
+        return total;
+    }
+
+    // Total calories from food minus calories expended from exercise
+    public double getNetCalories() {
+        return getTotalCalories() - getTotalCaloriesExpended();
     }
 
     public boolean removeEntry(int index) {

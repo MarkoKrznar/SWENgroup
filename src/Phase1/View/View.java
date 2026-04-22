@@ -20,6 +20,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
@@ -46,14 +47,20 @@ public class View extends Application {
     private ChoiceBox<String> chooseFoodForLog = new ChoiceBox<>();
     private TextField tfLogServings = new TextField();
 
+    private ChoiceBox<String> chooseExerciseForLog = new ChoiceBox<>();
+    private TextField tfExerciseMinutes = new TextField();
+    private Button addExerciseEntryButton = new Button("Add Exercise To Log");
+
     private TextField tfWeight = new TextField();
     private TextField tfCalorieLimit = new TextField();
 
     private Label lblTotalCalories = new Label("Total calories: 0.0");
     private Label lblLimitStatus = new Label("Status: Within limit");
-    private Label lblMacros = new Label("Fat: 0% | Carb: 0% | Protein: 0%");
-
+    private Label lblCaloriesExpended = new Label("Calories expended: 0.0");
+    private Label lblNetCalories = new Label("Net calories: 0.0");
     private Recipe recipe;
+
+    private PieChart macrosPieChart = new PieChart();
 
     private TableView<FoodComponent> foodsTable = new TableView<>();
     private TableView<LogEntry> logTable = new TableView<>();
@@ -61,6 +68,7 @@ public class View extends Application {
     private List<FoodComponent> allFoods = new ArrayList<>();
     private ObservableList<FoodComponent> tableData = FXCollections.observableArrayList();
     private ObservableList<LogEntry> logTableData = FXCollections.observableArrayList();
+    private ObservableList<Exercise> exerciseTableData = FXCollections.observableArrayList();
 
     private TableView<Exercise> exerciseTable = new TableView<>();
 
@@ -74,18 +82,10 @@ public class View extends Application {
         VBox rightSection = createDailyLogSection();
         VBox exerciseSection = createExerciseSection();
 
-        HBox topRow = new HBox(20, leftSection, rightSection);
-        topRow.setPadding(new Insets(15, 15, 0, 15));
+        VBox leftColumn = new VBox(10, leftSection, exerciseSection);
 
-        exerciseSection.setPrefWidth(650);
-        exerciseTable.setPrefHeight(330);
-        exerciseTable.setPrefWidth(650);
-
-        HBox bottomRow = new HBox(20, exerciseSection);
-        bottomRow.setPadding(new Insets(15, 15, 10, 15));
-        bottomRow.setAlignment(Pos.CENTER);
-
-        VBox main = new VBox(10, topRow, bottomRow);
+        HBox main = new HBox(20, leftColumn, rightSection);
+        main.setPadding(new Insets(15));
 
         Scene scene = new Scene(main, 1450, 950);
         stage.setScene(scene);
@@ -94,6 +94,7 @@ public class View extends Application {
         controller = new Controller(new Model(), this);
     }
 
+    // Food Section
     @SuppressWarnings("unchecked")
     private VBox createFoodSection() {
         VBox foodSection = new VBox(10);
@@ -116,7 +117,7 @@ public class View extends Application {
 
         foodsTable.getColumns().addAll(
                 nameColumn, caloriesColumn, fatsColumn, carbsColumn, proteinsColumn);
-        foodsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        foodsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); // this
         foodsTable.setEditable(false);
         foodsTable.setPrefHeight(330);
         foodsTable.setPrefWidth(650);
@@ -172,6 +173,15 @@ public class View extends Application {
                 updateDailyDataButton);
         dailyDataRow.setAlignment(Pos.CENTER_LEFT);
 
+        chooseExerciseForLog.setPrefWidth(220);
+        tfExerciseMinutes.setPromptText("Minutes");
+
+        HBox addExerciseRow = new HBox(10,
+                new Label("Exercise:"), chooseExerciseForLog,
+                new Label("Minutes:"), tfExerciseMinutes,
+                addExerciseEntryButton);
+        addExerciseRow.setAlignment(Pos.CENTER_LEFT);
+
         TableColumn<LogEntry, String> logFoodCol = new TableColumn<>("Food");
         logFoodCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFood().getName()));
 
@@ -184,14 +194,22 @@ public class View extends Application {
 
         logTable.getColumns().addAll(logFoodCol, logServingsCol, logCaloriesCol);
         logTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        logTable.setPrefHeight(350);
+        logTable.setPrefHeight(700);
         logTable.setPrefWidth(650);
         logTable.setItems(logTableData);
 
+        macrosPieChart.setPrefSize(400, 350);
+        macrosPieChart.setMinSize(400, 350);
+        macrosPieChart.setMaxSize(400, 350);
+        macrosPieChart.setLegendVisible(true);
+        macrosPieChart.setLabelsVisible(true);
+
         VBox summaryBox = new VBox(8,
                 lblTotalCalories,
+                lblCaloriesExpended,
+                lblNetCalories,
                 lblLimitStatus,
-                lblMacros);
+                macrosPieChart);
         summaryBox.setPadding(new Insets(10));
         summaryBox.setStyle("-fx-background-color: #e3e3e3;");
 
@@ -199,6 +217,7 @@ public class View extends Application {
                 new Label("Daily Log"),
                 dateRow,
                 addEntryRow,
+                addExerciseRow,
                 dailyDataRow,
                 logTable,
                 deleteLogEntryButton,
@@ -401,16 +420,18 @@ public class View extends Application {
         TableColumn<Exercise, Double> caloriesColumn = new TableColumn<>("Calories");
         caloriesColumn.setCellValueFactory(new PropertyValueFactory<>("calories"));
 
-        TableColumn<Exercise, Double> actionColumn = new TableColumn<>("Action");
-        actionColumn.setCellValueFactory(new PropertyValueFactory<>("action"));
+        TableColumn<Exercise, Double> caloriesPerHourColumn = new TableColumn<>("Cal/Hour");
+        caloriesPerHourColumn.setCellValueFactory(new PropertyValueFactory<>("caloriesPerHour"));
 
         // TODO: Log button
 
         // Adding all the columns to the table's list of columns
-        exerciseTable.getColumns().addAll(nameColumn, caloriesColumn, actionColumn);
+        exerciseTable.getColumns().addAll(nameColumn, caloriesColumn, caloriesPerHourColumn);
         exerciseTable.setEditable(false);
-        exerciseTable.setPrefHeight(300);
-        exerciseTable.setPrefWidth(60);
+        exerciseTable.setPrefHeight(330);
+        exerciseTable.setPrefWidth(650);
+        exerciseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        exerciseTable.setItems(exerciseTableData);
 
         FlowPane exerciseControlPanel = new FlowPane(10, 10);
         exerciseControlPanel.setAlignment(Pos.CENTER);
@@ -427,6 +448,65 @@ public class View extends Application {
 
     }
 
+    // Exercise Dialog
+    public Pair<Boolean, Exercise> showAddExerciseDialog() {
+        Dialog<Pair<Boolean, Exercise>> dialog = new Dialog<>();
+        dialog.setTitle("Add Exercise");
+        dialog.setHeaderText("Enter Exercise Details");
+
+        ButtonType addButton = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButton, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField exerciseName = new TextField();
+        exerciseName.setPromptText("Exercise Name");
+
+        TextField calories = new TextField();
+        calories.setPromptText("Calories");
+
+        TextField caloriesPerHour = new TextField();
+        caloriesPerHour.setPromptText("Calories per hour");
+
+        grid.add(new Label("Exercise Name:"), 0, 0);
+        grid.add(exerciseName, 1, 0);
+        grid.add(new Label("Calories:"), 0, 1);
+        grid.add(calories, 1, 1);
+
+        grid.add(new Label("Calories per hour:"), 0, 2);
+        grid.add(caloriesPerHour, 1, 2);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == addButton) {
+                try {
+                    String name = exerciseName.getText();
+                    double cal = Double.parseDouble(calories.getText());
+                    double calPerHour = Double.parseDouble(caloriesPerHour.getText());
+                    Exercise exercise = new Exercise(name, cal, calPerHour);
+                    return new Pair<>(true, exercise);
+                } catch (NumberFormatException e) {
+                    showAlert("Please enter valid numbers for calories and calories per hour.");
+                    return new Pair<>(false, null);
+                }
+            }
+            return new Pair<>(false, null);
+        });
+
+        return dialog.showAndWait().orElse(new Pair<>(false, null));
+    }
+
+    private void showAlert(String errormsg) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Input Error");
+        alert.setHeaderText(null);
+        alert.setContentText(errormsg);
+        alert.showAndWait();
+    }
+
     public void showMessage(String msg) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Wellness Manager");
@@ -435,9 +515,22 @@ public class View extends Application {
         alert.showAndWait();
     }
 
+    // Exercise section methods
+    public void refreshExerciseTable(List<Exercise> exercises) {
+        exerciseTableData.setAll(exercises);
+    }
+
+    // Refresh exercise selector
+    public void refreshExerciseSelector(List<Exercise> exercises) {
+        chooseExerciseForLog.getItems().clear();
+        for (Exercise exercise : exercises) {
+            chooseExerciseForLog.getItems().add(exercise.getName());
+        }
+    }
+
+    // Food section methods
     public void refreshTable(List<FoodComponent> foods) {
         tableData.setAll(foods);
-
         for (FoodComponent food : foods) {
             if (allFoods.stream().noneMatch(f -> f.getName().equals(food.getName()))) {
                 allFoods.add(food);
@@ -459,17 +552,31 @@ public class View extends Application {
         logTableData.setAll(entries);
     }
 
-    public void updateDailySummary(double totalCalories, double calorieLimit, boolean overLimit,
-            int fatPercent, int carbPercent, int proteinPercent) {
+    public void updateDailySummary(double totalCalories, double calorieLimit,
+            boolean overLimit, int fatPercent, int carbPercent, int proteinPercent,
+            double caloriesExpended, double netCalories) {
 
         lblTotalCalories.setText(String.format(
-                "Total calories: %.2f / %.2f",
-                totalCalories, calorieLimit));
-
+                "Total calories consumed: %.2f / %.2f", totalCalories, calorieLimit));
+        lblCaloriesExpended.setText(String.format(
+                "Total calories burned: %.2f", caloriesExpended));
+        lblNetCalories.setText(String.format(
+                "Net calories: %.2f", netCalories));
         lblLimitStatus.setText(overLimit ? "Status: Over limit" : "Status: Within limit");
-        lblMacros.setText(String.format(
-                "Fat: %d%% | Carb: %d%% | Protein: %d%%",
-                fatPercent, carbPercent, proteinPercent));
+
+        // Hide chart if no food logged yet
+        if (fatPercent == 0 && carbPercent == 0 && proteinPercent == 0) {
+            macrosPieChart.setData(FXCollections.observableArrayList());
+            return;
+        }
+
+        macrosPieChart.setVisible(true); // ← show it again
+
+        ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList(
+                new PieChart.Data("Fat " + fatPercent + "%", fatPercent),
+                new PieChart.Data("Carbs " + carbPercent + "%", carbPercent),
+                new PieChart.Data("Protein " + proteinPercent + "%", proteinPercent));
+        macrosPieChart.setData(pieData);
     }
 
     public void setDailyDataFields(double weight, double calorieLimit) {
@@ -507,6 +614,10 @@ public class View extends Application {
 
     public Button getLoadFoodsButton() {
         return loadFoodsButton;
+    }
+
+    public Button getLoadExercisesButton() {
+        return loadExerciseBtn;
     }
 
     public Button getLoadLogButton() {
@@ -548,4 +659,21 @@ public class View extends Application {
     public Button getUpdateDailyDataButton() {
         return updateDailyDataButton;
     }
+
+    public Button getAddExerciseButton() {
+        return addExerciseBtn;
+    }
+
+    public String getSelectedExerciseNameForLog() {
+        return chooseExerciseForLog.getValue();
+    }
+
+    public double getExerciseMinutesForLog() {
+        return Double.parseDouble(tfExerciseMinutes.getText().trim());
+    }
+
+    public Button getAddExerciseEntryButton() {
+        return addExerciseEntryButton;
+    }
+
 }
