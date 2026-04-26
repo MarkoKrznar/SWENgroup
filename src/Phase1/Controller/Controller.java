@@ -4,7 +4,14 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import Phase1.Controller.Command.AddExerciseCommand;
+import Phase1.Controller.Command.AddExerciseEntryCommand;
+import Phase1.Controller.Command.AddFoodCommand;
+import Phase1.Controller.Command.AddLogEntryCommand;
+import Phase1.Controller.Command.AddRecipeCommand;
+import Phase1.Controller.Command.CommandManager;
+import Phase1.Controller.Command.DeleteLogEntryCommand;
+import Phase1.Controller.Command.UpdateDailyDataCommand;
 import Phase1.Model.BasicFood;
 import Phase1.Model.Exercise;
 import Phase1.Model.FoodComponent;
@@ -18,6 +25,7 @@ public class Controller {
 
     private final Model model;
     private final View view;
+    private final CommandManager commandManager = new CommandManager();
 
     public Controller(Model model, View view) {
         this.model = model;
@@ -77,7 +85,7 @@ public class Controller {
                 return;
             }
 
-            model.addExerciseEntry(exerciseName, minutes);
+            commandManager.executeCommand(new AddExerciseEntryCommand(model, exerciseName, minutes));
 
         } catch (NumberFormatException e) {
             view.showMessage("Minutes must be a valid number.");
@@ -87,7 +95,7 @@ public class Controller {
     // Process the result from the add exercise dialog
     public void handleAddExerciseDialogResult(Exercise exercise) {
         if (exercise != null) {
-            model.addExercise(exercise);
+            commandManager.executeCommand(new AddExerciseCommand(model, exercise));
             try {
                 model.saveExercisesToFile();
             } catch (IOException e) {
@@ -120,7 +128,7 @@ public class Controller {
                 return;
             }
 
-            model.addLogEntry(foodName, servings);
+            commandManager.executeCommand(new AddLogEntryCommand(model, foodName, servings));
 
         } catch (NumberFormatException e) {
             view.showMessage("Servings must be a valid number.");
@@ -136,11 +144,7 @@ public class Controller {
             return;
         }
 
-        boolean deleted = model.deleteLogEntry(selectedIndex);
-        if (!deleted) {
-            view.showMessage("Could not delete the selected log entry.");
-            return;
-        }
+        commandManager.executeCommand(new DeleteLogEntryCommand(model, selectedIndex));
 
     }
 
@@ -149,8 +153,7 @@ public class Controller {
             double weight = view.getWeightInputValue();
             double calorieLimit = view.getCalorieLimitInputValue();
 
-            model.updateWeight(weight);
-            model.updateCalorieLimit(calorieLimit);
+            commandManager.executeCommand(new UpdateDailyDataCommand(model, weight, calorieLimit));
 
             view.showMessage("Daily data updated correctly.");
 
@@ -194,7 +197,7 @@ public class Controller {
             return;
         }
 
-        model.addRecipe(recipe);
+        commandManager.executeCommand(new AddRecipeCommand(model, recipe));
     }
 
     public void handleAddFoodDialog(BasicFood food) {
@@ -203,7 +206,7 @@ public class Controller {
             return;
         }
 
-        model.addFood(food);
+        commandManager.executeCommand(new AddFoodCommand(model, food));
     }
 
 }
