@@ -11,6 +11,7 @@ import Phase1.Model.FoodComponent;
 import Phase1.Model.FoodType;
 import Phase1.Model.LogEntry;
 import Phase1.Model.Model;
+import Phase1.Model.Observer;
 import Phase1.Model.Recipe;
 import javafx.application.Application;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -27,7 +28,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-public class View extends Application {
+public class View extends Application implements Observer {
 
     private Button loadFoodsButton = new Button("Load Foods");
     private Button loadLogButton = new Button("Load Log");
@@ -73,6 +74,7 @@ public class View extends Application {
     private TableView<Exercise> exerciseTable = new TableView<>();
 
     private Controller controller;
+    private Model model;
 
     @Override
     public void start(Stage stage) {
@@ -92,6 +94,45 @@ public class View extends Application {
         stage.show();
 
         controller = new Controller(new Model(), this);
+    }
+
+    public void setModel(Model model) {
+        this.model = model;
+    }
+
+    @Override
+    public void update() {
+        if (model == null) {
+            return;
+        }
+
+        LocalDate modelDate = model.getSelectedDate();
+        if (datePicker.getValue() == null || !datePicker.getValue().equals(modelDate)) {
+            datePicker.setValue(modelDate);
+        }
+
+        List<FoodComponent> foods = model.getFoodCollection().getAllFoods();
+        refreshTable(foods);
+        refreshFoodSelector(foods);
+
+        List<Exercise> exercises = model.getExerciseCollection().getAllExercises();
+        refreshExerciseTable(exercises);
+        refreshExerciseSelector(exercises);
+
+        refreshLogTable(model.getSelectedLogEntries());
+        setDailyDataFields(
+                model.getSelectedLogWeight(),
+                model.getSelectedLogCalorieLimit());
+
+        updateDailySummary(
+                model.getSelectedLogTotalCalories(),
+                model.getSelectedLogCalorieLimit(),
+                model.selectedDayIsOverLimit(),
+                model.getSelectedLogFatPercent(),
+                model.getSelectedLogCarbPercent(),
+                model.getSelectedLogProteinPercent(),
+                model.getSelectedLog().getTotalCaloriesExpended(),
+                model.getSelectedLog().getNetCalories());
     }
 
     // Food Section

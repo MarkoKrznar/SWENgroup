@@ -2,7 +2,6 @@ package Phase1.Model;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,10 +16,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Model {
+public class Model implements Subject {
     private final FoodCollection foodCollection = new FoodCollection();
     private final ExerciseCollection exerciseCollection = new ExerciseCollection();
     private final Map<LocalDate, DailyLog> logs = new LinkedHashMap<>();
+    private final List<Observer> observers = new ArrayList<>();
     private LocalDate selectedDate = LocalDate.now();
     private final FoodFactoryRegistry factoryRegistry = new FoodFactoryRegistry();
 
@@ -76,6 +76,7 @@ public class Model {
         }
         selectedDate = date;
         getOrCreateLog(selectedDate);
+        notifyObservers();
     }
 
     public LocalDate getSelectedDate() {
@@ -85,6 +86,7 @@ public class Model {
     public void loadFoods() {
         foodCollection.getAllFoods().clear(); // no afecta realmente por copia, pero lo dejo fuera abajo
         loadFoodsFromCsv();
+        notifyObservers();
     }
 
     // after implementing factory this method is using registry to create foods and
@@ -147,6 +149,7 @@ public class Model {
                     exerciseCollection.addExercise(exercise);
                 }
             }
+            notifyObservers();
         } catch (IOException e) {
             System.err.println("Could not load exercise.csv: " + e.getMessage());
         }
@@ -168,10 +171,12 @@ public class Model {
 
     public void addFood(FoodComponent food) {
         foodCollection.addFood(food);
+        notifyObservers();
     }
 
     public void addRecipe(Recipe recipe) {
         foodCollection.addFood(recipe);
+        notifyObservers();
     }
 
     public void addLogEntry(String foodName, double servings) {
@@ -180,6 +185,7 @@ public class Model {
             throw new IllegalArgumentException("Food not found: " + foodName);
         }
         getSelectedLog().addEntry(food, servings);
+        notifyObservers();
     }
 
     public void addExerciseEntry(String exerciseName, double minutes) {
@@ -188,18 +194,25 @@ public class Model {
             throw new IllegalArgumentException("Exercise not found: " + exerciseName);
         }
         getSelectedLog().addExercise(exercise, minutes);
+        notifyObservers();
     }
 
     public boolean deleteLogEntry(int index) {
-        return getSelectedLog().removeEntry(index);
+        boolean removed = getSelectedLog().removeEntry(index);
+        if (removed) {
+            notifyObservers();
+        }
+        return removed;
     }
 
     public void updateWeight(double weight) {
         getSelectedLog().setWeight(weight);
+        notifyObservers();
     }
 
     public void updateCalorieLimit(double limit) {
         getSelectedLog().setCalorieLimit(limit);
+        notifyObservers();
     }
 
     public List<LogEntry> getSelectedLogEntries() {
@@ -327,6 +340,7 @@ public class Model {
                     dailyLog.setCalorieLimit(Double.parseDouble(parts[4]));
                 }
             }
+            notifyObservers();
         } catch (IOException | NumberFormatException e) {
             System.err.println("Error loading log.csv: " + e.getMessage());
         }
@@ -348,5 +362,30 @@ public class Model {
 
     public void addExercise(Exercise exercise) {
         exerciseCollection.addExercise(exercise);
+        notifyObservers();
+    }
+
+    @Override
+    public void attach(Observer o) {
+        if (o != null && !observers.contains(o)) {
+            observers.add(o);
+        }
+    }
+
+    @Override
+    public void detach(Observer o) {
+        observers.remove(o);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update();
+        }
+    }
+
+    // Kept to match the class diagram naming.
+    public void updateData() {
+        notifyObservers();
     }
 }

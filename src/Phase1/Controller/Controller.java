@@ -22,6 +22,8 @@ public class Controller {
     public Controller(Model model, View view) {
         this.model = model;
         this.view = view;
+        this.view.setModel(model);
+        this.model.attach(view);
         attachEventHandlers();
         initializeApp();
     }
@@ -46,20 +48,14 @@ public class Controller {
 
     private void initializeApp() {
         model.setSelectedDate(LocalDate.now());
-        refreshAll();
     }
 
     private void handleLoadFoods() {
         model.loadFoods();
-        view.refreshTable(model.getFoodCollection().getAllFoods());
-        view.refreshFoodSelector(model.getFoodCollection().getAllFoods());
-        refreshSelectedDateLog();
     }
 
     private void handleLoadExercises() {
         model.loadExerciseFromCsv();
-        view.refreshExerciseTable(model.getExerciseCollection().getAllExercises());
-        view.refreshExerciseSelector(model.getExerciseCollection().getAllExercises());
     }
 
     // Add exercise dialog handler
@@ -82,7 +78,6 @@ public class Controller {
             }
 
             model.addExerciseEntry(exerciseName, minutes);
-            refreshSelectedDateLog();
 
         } catch (NumberFormatException e) {
             view.showMessage("Minutes must be a valid number.");
@@ -93,7 +88,6 @@ public class Controller {
     public void handleAddExerciseDialogResult(Exercise exercise) {
         if (exercise != null) {
             model.addExercise(exercise);
-            view.refreshExerciseTable(model.getExerciseCollection().getAllExercises());
             try {
                 model.saveExercisesToFile();
             } catch (IOException e) {
@@ -104,7 +98,6 @@ public class Controller {
 
     private void handleLoadLog() {
         model.loadData();
-        refreshSelectedDateLog();
         view.showMessage("Log loaded correctly.");
     }
 
@@ -115,7 +108,6 @@ public class Controller {
         }
 
         model.setSelectedDate(selected);
-        refreshSelectedDateLog();
     }
 
     private void handleAddLogEntry() {
@@ -129,7 +121,6 @@ public class Controller {
             }
 
             model.addLogEntry(foodName, servings);
-            refreshSelectedDateLog();
 
         } catch (NumberFormatException e) {
             view.showMessage("Servings must be a valid number.");
@@ -151,7 +142,6 @@ public class Controller {
             return;
         }
 
-        refreshSelectedDateLog();
     }
 
     private void handleUpdateDailyData() {
@@ -162,7 +152,6 @@ public class Controller {
             model.updateWeight(weight);
             model.updateCalorieLimit(calorieLimit);
 
-            refreshSelectedDateLog();
             view.showMessage("Daily data updated correctly.");
 
         } catch (NumberFormatException e) {
@@ -206,8 +195,6 @@ public class Controller {
         }
 
         model.addRecipe(recipe);
-        view.refreshTable(model.getFoodCollection().getAllFoods());
-        view.refreshFoodSelector(model.getFoodCollection().getAllFoods());
     }
 
     public void handleAddFoodDialog(BasicFood food) {
@@ -217,33 +204,6 @@ public class Controller {
         }
 
         model.addFood(food);
-        view.refreshTable(model.getFoodCollection().getAllFoods());
-        view.refreshFoodSelector(model.getFoodCollection().getAllFoods());
-    }
-
-    private void refreshAll() {
-        view.setDate(model.getSelectedDate());
-        view.refreshTable(model.getFoodCollection().getAllFoods());
-        view.refreshFoodSelector(model.getFoodCollection().getAllFoods());
-        refreshSelectedDateLog();
-    }
-
-    private void refreshSelectedDateLog() {
-        view.setDate(model.getSelectedDate());
-        view.refreshLogTable(model.getSelectedLogEntries());
-        view.setDailyDataFields(
-                model.getSelectedLogWeight(),
-                model.getSelectedLogCalorieLimit());
-
-        view.updateDailySummary(
-                model.getSelectedLogTotalCalories(),
-                model.getSelectedLogCalorieLimit(),
-                model.selectedDayIsOverLimit(),
-                model.getSelectedLogFatPercent(),
-                model.getSelectedLogCarbPercent(),
-                model.getSelectedLogProteinPercent(),
-                model.getSelectedLog().getTotalCaloriesExpended(),
-                model.getSelectedLog().getNetCalories());
     }
 
 }
