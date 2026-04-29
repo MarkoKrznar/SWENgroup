@@ -388,4 +388,47 @@ public class Model implements Subject {
     public void updateData() {
         notifyObservers();
     }
+
+    public LogEntry getSelectedLogEntry(int index) {
+        return getSelectedLog().getEntry(index);
+    }
+
+    public void addLogEntryObject(LogEntry entry) {
+        getSelectedLog().addEntry(entry);
+        notifyObservers();
+    }
+
+    public void addLogEntryObjectAt(int index, LogEntry entry) {
+        getSelectedLog().addEntryAt(index, entry);
+        notifyObservers();
+    }
+
+    public ExerciseEntry getSelectedExerciseEntry(int index) {
+        return getSelectedLog().getExerciseEntry(index);
+    }
+
+    public boolean deleteExerciseEntry(int index) {
+        boolean removed = getSelectedLog().removeExerciseEntry(index);
+        if (removed) {
+            notifyObservers();
+        }
+        return removed;
+    }
+
+    public void addExerciseEntryObject(ExerciseEntry entry) {
+        getSelectedLog().addExerciseEntry(entry);
+        notifyObservers();
+    }
+
+    public void addExerciseEntryObjectAt(int index, ExerciseEntry entry) {
+        getSelectedLog().addExerciseEntryAt(index, entry);
+        notifyObservers();
+    }
+
+    public void removeFood(String name) {
+        if (foodCollection.containsFood(name)) {
+            foodCollection.getAllFoods().removeIf(f -> f.getName().equals(name));
+            notifyObservers();
+        }
+    }
 }

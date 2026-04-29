@@ -52,6 +52,8 @@ public class Controller {
         view.getLoadExercisesButton().setOnAction(event -> handleLoadExercises());
         view.getAddExerciseButton().setOnAction(event -> handleAddExercise());
         view.getAddExerciseEntryButton().setOnAction(event -> handleAddExerciseEntry());
+        view.getUndoButton().setOnAction(event -> commandManager.undo());
+        view.getRedoButton().setOnAction(event -> commandManager.redo());
     }
 
     private void initializeApp() {

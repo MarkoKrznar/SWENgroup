@@ -7,6 +7,7 @@ public class AddExerciseEntryCommand implements Command {
     private final Model model;
     private final String exerciseName;
     private final double minutes;
+    private int addedIndex = -1;
 
     public AddExerciseEntryCommand(Model model, String exerciseName, double minutes) {
         this.model = model;
@@ -17,5 +18,13 @@ public class AddExerciseEntryCommand implements Command {
     @Override
     public void execute() {
         model.addExerciseEntry(exerciseName, minutes);
+        addedIndex = model.getSelectedLog().getExerciseEntries().size() - 1;
+    }
+
+    @Override
+    public void undo() {
+        if (addedIndex >= 0) {
+            model.deleteExerciseEntry(addedIndex);
+        }
     }
 }

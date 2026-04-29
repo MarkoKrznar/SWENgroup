@@ -17,4 +17,9 @@ public class AddRecipeCommand implements Command {
     public void execute() {
         model.addRecipe(recipe);
     }
+
+    @Override
+    public void undo() {
+        model.removeFood(recipe.getName());
+    }
 }

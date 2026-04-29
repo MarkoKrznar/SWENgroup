@@ -39,6 +39,8 @@ public class View extends Application implements Observer {
     private Button showRecipesButton = new Button("Show Recipes");
     private Button addFoodButton = new Button("Add Food");
     private Button btnAddRecipe = new Button("Add Recipe");
+    private Button btnUndo = new Button("Undo");
+    private Button btnRedo = new Button("Redo");
 
     private DatePicker datePicker = new DatePicker(LocalDate.now());
     private Button addLogEntryButton = new Button("Add To Daily Log");
@@ -262,6 +264,8 @@ public class View extends Application implements Observer {
                 dailyDataRow,
                 logTable,
                 deleteLogEntryButton,
+                btnUndo,
+                btnRedo,
                 summaryBox);
 
         return logSection;
@@ -715,6 +719,14 @@ public class View extends Application implements Observer {
 
     public Button getAddExerciseEntryButton() {
         return addExerciseEntryButton;
+    }
+
+    public Button getUndoButton() {
+        return btnUndo;
+    }
+
+    public Button getRedoButton() {
+        return btnRedo;
     }
 
 }

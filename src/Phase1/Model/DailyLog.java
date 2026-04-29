@@ -148,4 +148,54 @@ public class DailyLog {
 
         return new double[] { totalFat, totalCarb, totalProtein };
     }
+
+    public LogEntry getEntry(int index) {
+        if (index < 0 || index >= entries.size()) {
+            return null;
+        }
+        return entries.get(index);
+    }
+
+    public void addEntry(LogEntry entry) {
+        if (entry == null) {
+            throw new IllegalArgumentException("Entry cannot be null");
+        }
+        entries.add(entry);
+    }
+
+    public void addEntryAt(int index, LogEntry entry) {
+        if (entry == null) {
+            throw new IllegalArgumentException("Entry cannot be null");
+        }
+        if (index < 0 || index > entries.size()) {
+            entries.add(entry);
+        } else {
+            entries.add(index, entry);
+        }
+    }
+
+    public ExerciseEntry getExerciseEntry(int index) {
+        if (index < 0 || index >= exerciseEntries.size()) {
+            return null;
+        }
+        return exerciseEntries.get(index);
+    }
+
+    public void addExerciseEntry(ExerciseEntry entry) {
+        if (entry == null) {
+            throw new IllegalArgumentException("Exercise entry cannot be null");
+        }
+        exerciseEntries.add(entry);
+    }
+
+    public void addExerciseEntryAt(int index, ExerciseEntry entry) {
+        if (entry == null) {
+            throw new IllegalArgumentException("Exercise entry cannot be null");
+        }
+        if (index < 0 || index > exerciseEntries.size()) {
+            exerciseEntries.add(entry);
+        } else {
+            exerciseEntries.add(index, entry);
+        }
+    }
 }

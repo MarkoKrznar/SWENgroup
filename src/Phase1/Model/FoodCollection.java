@@ -27,4 +27,8 @@ public class FoodCollection {
         return foods.containsKey(name);
     }
 
+    public void removeFood(String name) {
+        foods.remove(name);
+    }
+
 }
